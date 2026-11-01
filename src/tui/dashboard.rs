@@ -132,11 +132,13 @@ impl<'a, S: Store> DashboardApp<'a, S> {
             tx_type,
         )?;
 
-        self.all_transactions.push(tx);
+        let mut candidate = self.all_transactions.clone();
+        candidate.push(tx);
         self.store
-            .save_transactions(self.all_transactions.clone())
+            .save_transactions(candidate.clone())
             .map_err(|e| e.to_string())?;
 
+        self.all_transactions = candidate;
         self.refresh_filter();
         Ok(())
     }
@@ -862,5 +864,25 @@ mod tests {
         assert_eq!(app.active_preset, Some(PresetPeriod::AllTime));
         app.cycle_preset();
         assert_eq!(app.active_preset, None);
+    }
+
+    struct FailingStore;
+    impl Store for FailingStore {
+        fn save_transactions(&self, _: Vec<Transaction>) -> Result<(), String> {
+            Err("Disk write failure".to_string())
+        }
+        fn load_transactions(&self) -> Result<Vec<Transaction>, String> {
+            Ok(Vec::new())
+        }
+    }
+
+    #[test]
+    fn test_tui_app_add_transaction_failure_does_not_mutate_state() {
+        let store = FailingStore;
+        let mut app = DashboardApp::new(&store).unwrap();
+        let res = app.add_transaction(TransactionType::Income, "100.0", "Service", "Category");
+        assert!(res.is_err());
+        assert_eq!(app.all_transactions.len(), 0);
+        assert_eq!(app.filtered_transactions.len(), 0);
     }
 }
