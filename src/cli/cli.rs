@@ -148,10 +148,7 @@ pub fn run(cli: Cli, store: impl Store) -> Result<(), Box<dyn std::error::Error>
 }
 
 pub fn launch_tui(store: &impl Store) -> Result<(), Box<dyn std::error::Error>> {
-    let transactions = store.load_transactions()?;
-    let summary = crate::domain::FinancialSummary::new(&transactions);
-    let dashboard = crate::tui::Dashboard::new(transactions, summary);
-    crate::tui::run_dashboard(dashboard)?;
+    crate::tui::run_dashboard(store)?;
     Ok(())
 }
 
