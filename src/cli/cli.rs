@@ -1,7 +1,7 @@
-use clap::{Parser, Subcommand};
 use crate::domain::transaction::{Transaction, TransactionType};
 use crate::persistence::Store;
 use chrono::TimeZone;
+use clap::{Parser, Subcommand};
 use std::io::{self, Write};
 
 #[derive(Parser)]
@@ -68,13 +68,31 @@ pub enum PresetPeriod {
 }
 
 impl PresetPeriod {
-    pub fn date_range(&self, now: chrono::NaiveDate) -> (Option<chrono::NaiveDate>, Option<chrono::NaiveDate>) {
+    pub fn date_range(
+        &self,
+        now: chrono::NaiveDate,
+    ) -> (Option<chrono::NaiveDate>, Option<chrono::NaiveDate>) {
         match self {
-            PresetPeriod::Last10Days => (now.checked_sub_signed(chrono::Duration::days(10)), Some(now)),
-            PresetPeriod::LastMonth => (now.checked_sub_signed(chrono::Duration::days(30)), Some(now)),
-            PresetPeriod::Last3Months => (now.checked_sub_signed(chrono::Duration::days(90)), Some(now)),
-            PresetPeriod::Last6Months => (now.checked_sub_signed(chrono::Duration::days(180)), Some(now)),
-            PresetPeriod::LastYear => (now.checked_sub_signed(chrono::Duration::days(365)), Some(now)),
+            PresetPeriod::Last10Days => (
+                now.checked_sub_signed(chrono::Duration::days(10)),
+                Some(now),
+            ),
+            PresetPeriod::LastMonth => (
+                now.checked_sub_signed(chrono::Duration::days(30)),
+                Some(now),
+            ),
+            PresetPeriod::Last3Months => (
+                now.checked_sub_signed(chrono::Duration::days(90)),
+                Some(now),
+            ),
+            PresetPeriod::Last6Months => (
+                now.checked_sub_signed(chrono::Duration::days(180)),
+                Some(now),
+            ),
+            PresetPeriod::LastYear => (
+                now.checked_sub_signed(chrono::Duration::days(365)),
+                Some(now),
+            ),
             PresetPeriod::AllTime => (None, None),
         }
     }
@@ -82,11 +100,35 @@ impl PresetPeriod {
 
 pub fn run(cli: Cli, store: impl Store) -> Result<(), Box<dyn std::error::Error>> {
     match cli.command {
-        Some(Commands::Income { amount, service, category, date }) => {
-            add_transaction(&store, TransactionType::Income, amount, service, category, date)?;
+        Some(Commands::Income {
+            amount,
+            service,
+            category,
+            date,
+        }) => {
+            add_transaction(
+                &store,
+                TransactionType::Income,
+                amount,
+                service,
+                category,
+                date,
+            )?;
         }
-        Some(Commands::Expense { amount, service, category, date }) => {
-            add_transaction(&store, TransactionType::Expense, amount, service, category, date)?;
+        Some(Commands::Expense {
+            amount,
+            service,
+            category,
+            date,
+        }) => {
+            add_transaction(
+                &store,
+                TransactionType::Expense,
+                amount,
+                service,
+                category,
+                date,
+            )?;
         }
         Some(Commands::Report { preset, from, to }) => {
             show_report(&store, preset, from, to)?;
@@ -143,14 +185,29 @@ pub fn run_interactive(store: &impl Store) -> Result<(), Box<dyn std::error::Err
 
                 print!("Service: ");
                 io::stdout().flush()?;
-                let service = reader.next().unwrap_or(Ok(String::new()))?.trim().to_string();
+                let service = reader
+                    .next()
+                    .unwrap_or(Ok(String::new()))?
+                    .trim()
+                    .to_string();
 
                 print!("Category: ");
                 io::stdout().flush()?;
-                let category = reader.next().unwrap_or(Ok(String::new()))?.trim().to_string();
+                let category = reader
+                    .next()
+                    .unwrap_or(Ok(String::new()))?
+                    .trim()
+                    .to_string();
 
                 let today = chrono::Utc::now().date_naive().to_string();
-                if let Err(e) = add_transaction(store, TransactionType::Income, amount, service, category, today) {
+                if let Err(e) = add_transaction(
+                    store,
+                    TransactionType::Income,
+                    amount,
+                    service,
+                    category,
+                    today,
+                ) {
                     println!("Error: {}", e);
                 }
             }
@@ -162,14 +219,29 @@ pub fn run_interactive(store: &impl Store) -> Result<(), Box<dyn std::error::Err
 
                 print!("Service: ");
                 io::stdout().flush()?;
-                let service = reader.next().unwrap_or(Ok(String::new()))?.trim().to_string();
+                let service = reader
+                    .next()
+                    .unwrap_or(Ok(String::new()))?
+                    .trim()
+                    .to_string();
 
                 print!("Category: ");
                 io::stdout().flush()?;
-                let category = reader.next().unwrap_or(Ok(String::new()))?.trim().to_string();
+                let category = reader
+                    .next()
+                    .unwrap_or(Ok(String::new()))?
+                    .trim()
+                    .to_string();
 
                 let today = chrono::Utc::now().date_naive().to_string();
-                if let Err(e) = add_transaction(store, TransactionType::Expense, amount, service, category, today) {
+                if let Err(e) = add_transaction(
+                    store,
+                    TransactionType::Expense,
+                    amount,
+                    service,
+                    category,
+                    today,
+                ) {
                     println!("Error: {}", e);
                 }
             }
@@ -180,7 +252,11 @@ pub fn run_interactive(store: &impl Store) -> Result<(), Box<dyn std::error::Err
                 println!("Select Report Filter: (1: 10 Days, 2: 1 Month, 3: 3 Months, 4: 6 Months, 5: 1 Year, 6: All)");
                 print!("> ");
                 io::stdout().flush()?;
-                let filter_choice = reader.next().unwrap_or(Ok(String::new()))?.trim().to_string();
+                let filter_choice = reader
+                    .next()
+                    .unwrap_or(Ok(String::new()))?
+                    .trim()
+                    .to_string();
                 let preset = match filter_choice.as_str() {
                     "1" => Some(PresetPeriod::Last10Days),
                     "2" => Some(PresetPeriod::LastMonth),
@@ -217,18 +293,11 @@ fn add_transaction(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let parsed_date = chrono::NaiveDate::parse_from_str(&date_str, "%Y-%m-%d")
         .map_err(|e| format!("Invalid date format. Please use YYYY-MM-DD: {}", e))?;
-    
+
     let datetime = chrono::Utc.from_utc_datetime(&parsed_date.and_hms_opt(0, 0, 0).unwrap());
     let id = uuid::Uuid::now_v7().to_string();
 
-    let transaction = Transaction::new(
-        id,
-        amount,
-        service,
-        category,
-        datetime,
-        transaction_type,
-    )?;
+    let transaction = Transaction::new(id, amount, service, category, datetime, transaction_type)?;
 
     let mut transactions = store.load_transactions()?;
     transactions.push(transaction);
@@ -248,8 +317,19 @@ fn show_report(
 
     let filtered_transactions = if let Some(preset_period) = preset {
         filter_by_preset(&transactions, preset_period)
-    } else if let (Some(from_date), Some(to_date)) = (&from, &to) {
-        filter_by_date_range(&transactions, from_date, to_date)?
+    } else if from.is_some() || to.is_some() {
+        match (&from, &to) {
+            (Some(from_date), Some(to_date)) => {
+                filter_by_date_range(&transactions, from_date, to_date)?
+            }
+            (Some(_), None) => {
+                return Err("Both --from and --to must be provided for a custom date range".into())
+            }
+            (None, Some(_)) => {
+                return Err("Both --from and --to must be provided for a custom date range".into())
+            }
+            (None, None) => unreachable!(),
+        }
     } else {
         transactions
     };
@@ -299,7 +379,8 @@ pub fn filter_by_preset_at(
 ) -> Vec<Transaction> {
     let (start_opt, end_opt) = preset.date_range(now);
 
-    transactions.iter()
+    transactions
+        .iter()
         .filter(|t| {
             let d = t.date.date_naive();
             if let Some(start) = start_opt {
@@ -325,11 +406,16 @@ pub fn filter_by_date_range(
 ) -> Result<Vec<Transaction>, Box<dyn std::error::Error>> {
     let from_date = chrono::NaiveDate::parse_from_str(from, "%Y-%m-%d")
         .map_err(|e| format!("Invalid 'from' date format. Please use YYYY-MM-DD: {}", e))?;
-        
+
     let to_date = chrono::NaiveDate::parse_from_str(to, "%Y-%m-%d")
         .map_err(|e| format!("Invalid 'to' date format. Please use YYYY-MM-DD: {}", e))?;
 
-    Ok(transactions.iter()
+    if from_date > to_date {
+        return Err("Start date ('from') cannot be after end date ('to')".into());
+    }
+
+    Ok(transactions
+        .iter()
         .filter(|t| {
             let transaction_date = t.date.date_naive();
             transaction_date >= from_date && transaction_date <= to_date
@@ -343,9 +429,20 @@ mod tests {
     use super::*;
 
     fn make_tx(id: &str, days_from_now: i64) -> Transaction {
-        let date = chrono::Utc::now().date_naive().checked_add_signed(chrono::Duration::days(days_from_now)).unwrap();
+        let date = chrono::Utc::now()
+            .date_naive()
+            .checked_add_signed(chrono::Duration::days(days_from_now))
+            .unwrap();
         let dt = chrono::Utc.from_utc_datetime(&date.and_hms_opt(12, 0, 0).unwrap());
-        Transaction::new(id.to_string(), 100.0, "Svc".to_string(), "Cat".to_string(), dt, TransactionType::Income).unwrap()
+        Transaction::new(
+            id.to_string(),
+            100.0,
+            "Svc".to_string(),
+            "Cat".to_string(),
+            dt,
+            TransactionType::Income,
+        )
+        .unwrap()
     }
 
     #[test]
@@ -370,5 +467,33 @@ mod tests {
         // AllTime includes everything including future
         let filtered_all = filter_by_preset_at(&all, PresetPeriod::AllTime, now);
         assert_eq!(filtered_all.len(), 4);
+    }
+
+    #[test]
+    fn test_filter_by_date_range_valid() {
+        let now = chrono::Utc::now().date_naive();
+        let past_5 = make_tx("t1", -5);
+        let past_15 = make_tx("t2", -15);
+        let all = vec![past_5, past_15];
+
+        let from = now
+            .checked_sub_signed(chrono::Duration::days(10))
+            .unwrap()
+            .to_string();
+        let to = now.to_string();
+        let res = filter_by_date_range(&all, &from, &to).unwrap();
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0].id, "t1");
+    }
+
+    #[test]
+    fn test_filter_by_date_range_reversed_fails() {
+        let all = vec![make_tx("t1", 0)];
+        let res = filter_by_date_range(&all, "2026-11-10", "2026-11-01");
+        assert!(res.is_err());
+        assert!(res
+            .unwrap_err()
+            .to_string()
+            .contains("cannot be after end date"));
     }
 }

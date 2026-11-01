@@ -1,7 +1,7 @@
+use crate::domain::transaction::Transaction;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
-use crate::domain::transaction::Transaction;
 
 pub trait Store {
     fn save_transactions(&self, transactions: Vec<Transaction>) -> Result<(), String>;
@@ -28,13 +28,13 @@ impl JsonStore {
 impl Store for JsonStore {
     fn save_transactions(&self, transactions: Vec<Transaction>) -> Result<(), String> {
         let transaction_file = TransactionFile { transactions };
-        
+
         let json = serde_json::to_string_pretty(&transaction_file)
             .map_err(|e| format!("Failed to serialize transactions: {}", e))?;
-            
+
         fs::write(&self.file_path, json)
             .map_err(|e| format!("Failed to write to file {}: {}", self.file_path, e))?;
-            
+
         Ok(())
     }
 

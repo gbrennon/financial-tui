@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Transaction {
@@ -20,15 +20,15 @@ impl Transaction {
         date: DateTime<Utc>,
         transaction_type: TransactionType,
     ) -> Result<Self, &'static str> {
-        if amount <= 0.0 {
-            return Err("Amount must be greater than zero");
+        if !amount.is_finite() || amount <= 0.0 {
+            return Err("Amount must be a positive number");
         }
-        
-        if service.is_empty() {
+
+        if service.trim().is_empty() {
             return Err("Service cannot be empty");
         }
 
-        if category.is_empty() {
+        if category.trim().is_empty() {
             return Err("Category cannot be empty");
         }
 

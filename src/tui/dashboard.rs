@@ -1,16 +1,16 @@
-use ratatui::{
-    backend::CrosstermBackend,
-    widgets::{Block, Borders, Table, Row, Cell},
-    layout::{Layout, Constraint, Direction, Alignment},
-    style::{Style, Color},
-    text::{Span, Line},
-    Frame,
-};
 use crossterm::{
-    terminal::{enable_raw_mode, disable_raw_mode},
     execute,
     terminal::EnterAlternateScreen,
     terminal::LeaveAlternateScreen,
+    terminal::{disable_raw_mode, enable_raw_mode},
+};
+use ratatui::{
+    backend::CrosstermBackend,
+    layout::{Alignment, Constraint, Direction, Layout},
+    style::{Color, Style},
+    text::{Line, Span},
+    widgets::{Block, Borders, Cell, Row, Table},
+    Frame,
 };
 use std::io;
 
@@ -43,13 +43,13 @@ pub fn run_dashboard(dashboard: Dashboard) -> Result<(), Box<dyn std::error::Err
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen)?;
-    
+
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = ratatui::Terminal::new(backend)?;
 
     loop {
         terminal.draw(|f| draw_ui(f, &dashboard))?;
-        
+
         // Simple way to exit - just press 'q'
         if crossterm::event::poll(std::time::Duration::from_millis(100))? {
             if let Ok(crossterm::event::Event::Key(key_event)) = crossterm::event::read() {
@@ -71,10 +71,10 @@ fn draw_ui(frame: &mut Frame, dashboard: &Dashboard) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
-            Constraint::Length(3),  // Header
-            Constraint::Length(6),  // Summary metrics
-            Constraint::Min(5),     // Transactions table
-            Constraint::Length(3),  // Footer
+            Constraint::Length(3), // Header
+            Constraint::Length(6), // Summary metrics
+            Constraint::Min(5),    // Transactions table
+            Constraint::Length(3), // Footer
         ])
         .split(frame.size());
 
@@ -93,15 +93,19 @@ fn draw_ui(frame: &mut Frame, dashboard: &Dashboard) {
         format!("Income: ${:.2}", dashboard.summary.total_income),
         Style::default().fg(Color::Green),
     );
-    
+
     let expense_text = Span::styled(
         format!("Expenses: ${:.2}", dashboard.summary.total_expenses),
         Style::default().fg(Color::Red),
     );
-    
+
     let balance_text = Span::styled(
         format!("Balance: ${:.2}", dashboard.summary.balance),
-        Style::default().fg(if dashboard.summary.balance >= 0.0 { Color::Green } else { Color::Red }),
+        Style::default().fg(if dashboard.summary.balance >= 0.0 {
+            Color::Green
+        } else {
+            Color::Red
+        }),
     );
 
     let preset_text = match dashboard.preset_filter {
@@ -122,21 +126,20 @@ fn draw_ui(frame: &mut Frame, dashboard: &Dashboard) {
     // Render the text inside the block with proper alignment
     let inner_area = summary_block.inner(chunks[1]);
     frame.render_widget(
-        ratatui::widgets::Paragraph::new(lines)
-            .alignment(Alignment::Left),
+        ratatui::widgets::Paragraph::new(lines).alignment(Alignment::Left),
         inner_area,
     );
 
     // Transactions Table
-    let transactions_block = Block::default()
-        .title("Transactions")
-        .borders(Borders::ALL);
-        
+    let transactions_block = Block::default().title("Transactions").borders(Borders::ALL);
+
     let transactions_block_cloned = transactions_block.clone();
     frame.render_widget(transactions_block_cloned, chunks[2]);
 
     if !dashboard.transactions.is_empty() {
-        let rows: Vec<Row> = dashboard.transactions.iter()
+        let rows: Vec<Row> = dashboard
+            .transactions
+            .iter()
             .map(|transaction| {
                 Row::new(vec![
                     Cell::from(transaction.date.format("%Y-%m-%d").to_string()),
@@ -164,7 +167,7 @@ fn draw_ui(frame: &mut Frame, dashboard: &Dashboard) {
                 Constraint::Length(15),
                 Constraint::Length(10),
             ]);
-            
+
         frame.render_widget(table, chunks[2]);
     }
 

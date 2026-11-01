@@ -1,4 +1,4 @@
 pub mod store;
 #[cfg(test)]
 mod tests;
-pub use store::{Store, JsonStore};
+pub use store::{JsonStore, Store};

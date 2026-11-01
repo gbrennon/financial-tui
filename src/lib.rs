@@ -1,6 +1,6 @@
+pub mod cli;
 pub mod domain;
 pub mod persistence;
-pub mod cli;
 pub mod tui;
 
 pub struct FinancialApp<'a> {
