@@ -1,0 +1,17 @@
+[package]
+name = "financial_presentation"
+version.workspace = true
+edition.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+financial_domain = { path = "../domain" }
+financial_infrastructure = { path = "../infrastructure" }
+clap = { version = "4.0", features = ["derive"] }
+crossterm = "0.27"
+ratatui = "0.24"
+tokio = { version = "1.0", features = ["full"] }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.1", features = ["v4"] }
