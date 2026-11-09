@@ -1,7 +1,8 @@
+use crate::dashboard;
 use financial_domain::transaction::{Transaction, TransactionType};
 use financial_infrastructure::Store;
 use chrono::TimeZone;
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use std::io::{self, Write};
 
 #[derive(Parser)]
@@ -57,7 +58,7 @@ pub enum Commands {
     Tui {},
 }
 
-#[derive(clap::ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(ValueEnum, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PresetPeriod {
     Last10Days,
     LastMonth,
@@ -148,7 +149,7 @@ pub fn run(cli: Cli, store: impl Store) -> Result<(), Box<dyn std::error::Error>
 }
 
 pub fn launch_tui(store: &impl Store) -> Result<(), Box<dyn std::error::Error>> {
-    use dashboard; dashboard::run_dashboard(store)?;
+    dashboard::run_dashboard(store)?;
     Ok(())
 }
 
