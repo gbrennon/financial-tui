@@ -3,6 +3,7 @@ use financial_infrastructure::Store;
 use chrono::TimeZone;
 use clap::{Parser, Subcommand};
 use std::io::{self, Write};
+use super::dashboard;
 
 #[derive(Parser)]
 #[clap(name = "financial-tui", about = "A financial management application")]
@@ -148,7 +149,7 @@ pub fn run(cli: Cli, store: impl Store) -> Result<(), Box<dyn std::error::Error>
 }
 
 pub fn launch_tui(store: &impl Store) -> Result<(), Box<dyn std::error::Error>> {
-    use dashboard; dashboard::run_dashboard(store)?;
+    dashboard::run_dashboard(store)?;
     Ok(())
 }
 
