@@ -1,3 +1,13 @@
+[package]
+name = "financial_tui"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+financial_presentation = { path = "crates/presentation" }
+financial_infrastructure = { path = "crates/infrastructure" }
+clap = { version = "4.0", features = ["derive"] }
+
 [workspace]
 members = [
     "crates/domain",
@@ -7,4 +17,4 @@ members = [
 
 [workspace.package]
 version = "0.1.0"
-edition = "2021"
+edition = "2024"

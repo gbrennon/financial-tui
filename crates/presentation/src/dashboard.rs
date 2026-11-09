@@ -12,7 +12,7 @@ use ratatui::{
 };
 use std::io;
 
-use financial_presentation::cli::{filter_by_date_range, filter_by_preset_at, PresetPeriod};
+use crate::cli::{filter_by_date_range, filter_by_preset_at, PresetPeriod};
 use financial_domain::transaction::{Transaction, TransactionType};
 use financial_domain::FinancialSummary;
 use financial_infrastructure::Store;
