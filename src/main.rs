@@ -1,5 +1,5 @@
 use clap::Parser;
-use financial_tui::{cli, persistence};
+use financial_presentation::{cli, persistence};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = cli::Cli::parse();
